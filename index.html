@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>BBG İş Takip</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #fff;
+    }
+    header {
+      background-color: #000;
+      padding: 20px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: gold; /* Gold renk */
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      padding: 20px;
+    }
+    .card {
+      background-color: #2a2a2a;
+      border-radius: 16px;
+      padding: 30px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: scale(1.05);
+      background-color: #333;
+    }
+    .card span {
+      font-size: 40px;
+      display: block;
+      margin-bottom: 10px;
+      color: gold; /* Gold renk */
+    }
+    .form, .stok-screen, .camera-container {
+      max-width: 400px;
+      margin: 30px auto;
+      padding: 20px;
+      background-color: #1f1f1f;
+      border-radius: 12px;
+    }
+    .form h2, .stok-screen h2 {
+      margin-bottom: 20px;
+      color: gold; /* Gold renk */
+      text-align: center;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: gold;
+      color: black;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .back-btn {
+      margin-top: 12px;
+      background-color: #444;
+      color: white;
+    }
+    .hidden {
+      display: none;
+    }
+    .stok-item {
+      background: #2b2b2b;
+      margin-bottom: 12px;
+      padding: 12px;
+      border-radius: 8px;
+    }
+    .stok-item span {
+      display: block;
+    }
+    .imei-info {
+      font-size: 14px;
+      color: #aaa;
+      margin-top: 10px;
+    }
+    #camera {
+      width: 100%;
+      height: auto;
+    }
+    .camera-container {
+      position: relative;
+      height: 300px;
+    }
+  </style>
+</head>
+<body>
+
+<header>BBG İş Takip</header>
+
+<div id="dashboard" class="container">
+  <div class="card" onclick="showScreen('alisForm')">
+    <span>🛒</span> Alış Ekle
+  </div>
+  <div class="card" onclick="showScreen('satisForm')">
+    <span>💸</span> Satış Ekle
+  </div>
+  <div class="card" onclick="showStok()">
+    <span>📦</span> Stok Görüntüle
+  </div>
+  <div class="card" onclick="showScreen('gelirForm')">
+    <span>💰</span> Gelir
+  </div>
+</div>
+
+<!-- Kamera Ekranı -->
+<div id="cameraContainer" class="camera-container hidden">
+  <video id="camera" autoplay></video>
+  <button onclick="stopScanner()">Kapat</button>
+</div>
+
+<!-- Alış Ekranı -->
+<div id="alisForm" class="form hidden">
+  <h2>🛒 Alış Ekle</h2>
+  <input type="text" id="alisUrun" placeholder="Ürün Adı">
+  <input type="number" id="alisMiktar" placeholder="Miktar">
+  <input type="number" id="alisFiyat" placeholder="Alış Fiyatı (₺)">
+  <input type="text" id="imei" placeholder="IMEI (Opsiyonel)">
+  <button onclick="alisEkle()">Kaydet</button>
+  <button class="back-btn" onclick="goBack()">Geri</button>
+  <button onclick="startScanner()">Barkodla IMEI Oku</button> <!-- Barkodla IMEI Oku Butonu -->
+</div>
+
+<!-- Satış Ekranı -->
+<div id="satisForm" class="form hidden">
+  <h2>💸 Satış Ekle</h2>
+  <select id="satisUrunSelect" onchange="showImeiInfo()">
+    <!-- Ürünler buraya yüklenecek -->
+  </select>
+  <input type="number" id="satisMiktar" placeholder="Miktar">
+  <input type="number" id="satisFiyat" placeholder="Satış Tutarı (₺)">
+  <div id="imeiInfo" class="imei-info"></div>
+  <button onclick="satisEkle()">Kaydet</button>
+  <button class="back-btn" onclick="goBack()">Geri</button>
+</div>
+
+<!-- Stok Ekranı -->
+<div id="stokEkrani" class="stok-screen hidden">
+  <h2>📦 Stok Durumu</h2>
+  <div id="stokList"></div>
+  <button class="back-btn" onclick="goBack()">Geri</button>
+</div>
+
+<!-- Gelir Ekranı -->
+<div id="gelirForm" class="form hidden">
+  <h2>💰 Gelir</h2>
+  <div id="gelirList"></div>
+  <button class="back-btn" onclick="goBack()">Geri</button>
+</div>
+
+<script>
+  const alislar = [];
+  const satislar = [];
+  let scannerActive = false;
+
+  function showScreen(id) {
+    document.getElementById('dashboard').classList.add('hidden');
+    document.querySelectorAll('.form, .stok-screen').forEach(e => e.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+  }
+
+  function goBack() {
+    document.querySelectorAll('.form, .stok-screen').forEach(e => e.classList.add('hidden'));
+    document.getElementById('dashboard').classList.remove('hidden');
+  }
+
+  function alisEkle() {
+    const urun = document.getElementById('alisUrun').value;
+    const miktar = parseInt(document.getElementById('alisMiktar').value);
+    const fiyat = parseFloat(document.getElementById('alisFiyat').value);
+    const imei = document.getElementById('imei').value;
+    if (urun && miktar && fiyat) {
+      alislar.push({ urun, miktar, fiyat, imei });
+      alert('Alış kaydedildi');
+      goBack();
+      showStok();
+      updateSatisUrunSelect();
+    }
+  }
+
+  function satisEkle() {
+    const urun = document.getElementById('satisUrunSelect').value;
+    const miktar = parseInt(document.getElementById('satisMiktar').value);
+    const fiyat = parseFloat(document.getElementById('satisFiyat').value);
+    const imei = alislar.find(item => item.urun === urun)?.imei;
+    if (urun && miktar && fiyat && imei) {
+      satislar.push({ urun, miktar, fiyat, imei });
+      alert('Satış kaydedildi');
+      goBack();
+      showGelir();
+    }
+  }
+
+  function showImeiInfo() {
+    const urun = document.getElementById('satisUrunSelect').value;
+    const imeiInfoDiv = document.getElementById('imeiInfo');
+    const urunData = alislar.find(item => item.urun === urun);
+    if (urunData) {
+      imeiInfoDiv.innerHTML = IMEI: ${urunData.imei.slice(-4)};
+    } else {
+      imeiInfoDiv.innerHTML = '';
+    }
+  }
+
+  function showStok() {
+    const stok = {};
+    const alisFiyat = {};
+    const satisFiyat = {};
+
+    alislar.forEach(e => {
+      stok[e.urun] = (stok[e.urun] || 0) + e.miktar;
+      alisFiyat[e.urun] = e.fiyat; // son alış fiyatı
+    });
+
+    satislar.forEach(e => {
+      stok[e.urun] = (stok[e.urun] || 0) - e.miktar;
+      satisFiyat[e.urun] = e.fiyat; // son satış fiyatı
+    });
+
+    const list = document.getElementById('stokList');
+    list.innerHTML = '';
+
+    for (let urun in stok) {
+      const miktar = stok[urun];
+      const alis = alisFiyat[urun] ? ₺${alisFiyat[urun]} : '—';
+      const satis = satisFiyat[urun] ? ₺${satisFiyat[urun]} : '—';
+
+      const item = document.createElement('div');
+      item.className = 'stok-item';
+      item.innerHTML = `
+        <strong>${urun}</strong>
+        <span>Stok: ${miktar}</span>
+        <span>Son Alış Fiyatı: ${alis}</span>
+        <span>Son Satış Fiyatı: ${satis}</span>
+      `;
+      list.appendChild(item);
+    }
+
+    showScreen('stokEkrani');
+  }
+
+  function updateSatisUrunSelect() {
+    const select = document.getElementById('satisUrunSelect');
+    select.innerHTML = '';
+    alislar.forEach(item => {
+      const option = document.createElement('option');
+      option.value = item.urun;
+      option.textContent = item.urun;
+      select.appendChild(option);
+    });
+  }
+
+  function showGelir() {
+    const gelirList = document.getElementById('gelirList');
+    gelirList.innerHTML = ''; // Gelir listesi temizleniyor
+
+    satislar.forEach(e => {
+      gelirList.innerHTML += <div class="stok-item"><span>${e.urun}</span><span>Miktar: ${e.miktar}</span><span>Tutar: ₺${e.fiyat * e.miktar}</span></div>;
+    });
+  }
+
+  function startScanner() {
+    document.getElementById('cameraContainer').classList.remove('hidden');
+    document.getElementById('dashboard').classList.add('hidden');
+    
+    if (!scannerActive) {
+      navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" } // "environment" arka kamerayı ifade eder
+      })
+      .then(stream => {
+        const videoElement = document.getElementById('camera');
+        videoElement.srcObject = stream;
+        videoElement.play();
+        scannerActive = true;
+
+        const barcodeDetector = new BarcodeDetector({ formats: ['qr_code', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128'] });
+        const scanBarcode = () => {
+          barcodeDetector.detect(videoElement).then(barcodes => {
+            if (barcodes.length > 0) {
+              const barcode = barcodes[0].rawValue;
+              document.getElementById('imei').value = barcode; // Barkod değeri IMEI alanına yansır
+            }
+          }).catch(console.error);
+        };
+
+        // Barkodları sürekli olarak tarar
+        setInterval(scanBarcode, 1000);
+      })
+      .catch(err => {
+        alert("Kamera açılmadı: " + err);
+      });
+    }
+  }
+
+  function stopScanner() {
+    document.getElementById('cameraContainer').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+  }
+</script>
+
+</body>
+</html>
