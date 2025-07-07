@@ -194,11 +194,11 @@
 <body>
 <div id="gameWrapper">
   <div id="topBar">
-    <div><span class="icon">💰</span> <span id="tlValue">0.00 TL</span></div>
+    <div><span class="icon">💰 Bakiye </span> <span id="tlValue">0.00 TL</span></div>
     <div><span class="icon">⛏</span> <span id="pickaxeType">Taş Kazma</span></div>
-    <div><span class="icon">🔋</span> <span id="energy">100</span></div>
-    <div><span class="icon">❤</span> <span id="durability">100</span></div>
-    <div><span class="icon">🎮</span> <span id="level">1</span></div>
+    <div><span class="icon">🔋 Enerji </span> <span id="energy">100</span></div>
+    <div><span class="icon">⛏❤ Kazma Gücü </span> <span id="durability">100</span></div>
+    <div><span class="icon">🎮 Seviye</span> <span id="level">1</span></div>
   </div>
   <div id="expBarContainer"><div id="expBar"></div></div>
   <div id="taskBar">Görevler yüklendi...</div>
@@ -675,18 +675,20 @@
 
   // Enerji içeceği satın alma
   window.buyEnergyDrink = function(){
-    let price = allItems["Energy Drink"].value;
-    if(state.coin < price){
-      alert("Yeterli Coin yok!");
-      return;
-    }
-    state.coin -= price;
-    state.energy = Math.min(100, state.energy + allItems["Energy Drink"].energy);
-    showNotice("Enerji içeceği satın alındı! Enerjin yenilendi.");
-    saveGame();
-    updateUI();
-    showBankScreen();
+  let price = allItems["Energy Drink"].value;
+  if(state.coin < price){
+    alert("Yeterli Coin yok!");
+    return;
   }
+  state.coin -= price;
+  state.energy = Math.min(100, state.energy + allItems["Energy Drink"].energy);
+  console.log("Enerji içeceği alındı, enerji:", state.energy); // kontrol için
+  showNotice("Enerji içeceği satın alındı! Enerjin yenilendi.");
+  saveGame();
+  updateUI();
+  showBankScreen();
+}
+
 
   // --- BUTON EVENTLERİ ---
 
