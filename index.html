@@ -674,24 +674,22 @@
   }
 
   // Enerji içeceği satın alma
-window.buyEnergyDrink = function () {
+ window.buyEnergyDrink = function() {
   const price = allItems["Energy Drink"].value;
   if (state.coin < price) {
     alert("Yeterli Coin yok!");
     return;
   }
+  
   state.coin -= price;
+  state.energy = Math.min(100, state.energy + allItems["Energy Drink"].energy); // Enerji artışı
 
-  // Enerji fulleniyor
-  state.energy = 100;
-
-  showNotice("Enerjin tamamen yenilendi!");
+  showNotice("Enerji içeceği satın alındı! Enerjin yenilendi.");
   saveGame();
   updateUI();
   showBankScreen();
 };
 
-  }
 
   // --- BUTON EVENTLERİ ---
 
