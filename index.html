@@ -1,322 +1,722 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>BBG İş Takip</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #121212;
-      color: #fff;
-    }
-    header {
-      background-color: #000;
-      padding: 20px;
-      text-align: center;
-      font-size: 28px;
-      font-weight: bold;
-      color: gold; /* Gold renk */
-    }
-    .container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      padding: 20px;
-    }
-    .card {
-      background-color: #2a2a2a;
-      border-radius: 16px;
-      padding: 30px 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .card:hover {
-      transform: scale(1.05);
-      background-color: #333;
-    }
-    .card span {
-      font-size: 40px;
-      display: block;
-      margin-bottom: 10px;
-      color: gold; /* Gold renk */
-    }
-    .form, .stok-screen, .camera-container {
-      max-width: 400px;
-      margin: 30px auto;
-      padding: 20px;
-      background-color: #1f1f1f;
-      border-radius: 12px;
-    }
-    .form h2, .stok-screen h2 {
-      margin-bottom: 20px;
-      color: gold; /* Gold renk */
-      text-align: center;
-    }
-    input, select {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 16px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: gold;
-      color: black;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .back-btn {
-      margin-top: 12px;
-      background-color: #444;
-      color: white;
-    }
-    .hidden {
-      display: none;
-    }
-    .stok-item {
-      background: #2b2b2b;
-      margin-bottom: 12px;
-      padding: 12px;
-      border-radius: 8px;
-    }
-    .stok-item span {
-      display: block;
-    }
-    .imei-info {
-      font-size: 14px;
-      color: #aaa;
-      margin-top: 10px;
-    }
-    #camera {
-      width: 100%;
-      height: auto;
-    }
-    .camera-container {
-      position: relative;
-      height: 300px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>BBG Metin RPG - Gelişmiş Versiyon</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select:none; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212;
+    color: #eee;
+    overflow: hidden;
+  }
+  #gameWrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  #topBar {
+    background: #1e1e1e;
+    padding: 6px 12px;
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select:none;
+  }
+  #topBar div {
+    display: flex;
+    align-items: center;
+  }
+  #topBar .icon {
+    font-size: 16px;
+    margin-right: 4px;
+    color: #00ffaa;
+  }
+  #expBarContainer {
+    background: #333;
+    width: 100%;
+    height: 6px;
+  }
+  #expBar {
+    height: 6px;
+    background: #00ffaa;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  #taskBar {
+    background: #2b2b2b;
+    padding: 6px 12px;
+    font-size: 12px;
+    text-align: center;
+    border-bottom: 1px solid #444;
+    color: #ffeb3b;
+    min-height: 28px;
+  }
+  #screenContent {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px 12px;
+    background: #191919;
+    font-size: 12px;
+    position: relative;
+  }
+  #bottomBar {
+    display: flex;
+    justify-content: space-around;
+    background: #111;
+    border-top: 1px solid #444;
+    user-select:none;
+  }
+  .bottomBtn {
+    flex: 1;
+    padding: 8px 0;
+    font-size: 11px;
+    text-align: center;
+    border-right: 1px solid #222;
+    cursor: pointer;
+    user-select:none;
+  }
+  .bottomBtn:last-child {
+    border-right: none;
+  }
+  .bottomBtn span {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+  button {
+    background: #00ffaa;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    margin: 5px 0;
+    cursor: pointer;
+    user-select:none;
+  }
+  button:disabled {
+    background: gray;
+    cursor: not-allowed;
+  }
+  ul { padding-left: 16px; margin-top: 5px; }
+  h2 { font-size: 14px; margin: 8px 0; }
+  .item-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #333;
+    align-items: center;
+  }
+  .mine-icon {
+    position: absolute;
+    font-size: 20px;
+    color: #00ffaa;
+    pointer-events: none;
+    user-select: none;
+    animation: minePop 0.8s ease forwards;
+    font-weight: bold;
+  }
+  @keyframes minePop {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-40px) scale(1.4); }
+  }
+  .item-slot {
+    background: rgba(255,255,255,0.1);
+    border-radius: 5px;
+    padding: 6px 8px;
+    margin: 3px 4px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    cursor: default;
+    user-select:none;
+  }
+  .item-slot img {
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+  }
+  .craft-item {
+    margin-bottom: 6px;
+  }
+  .craft-item span {
+    margin-left: 4px;
+    font-weight: bold;
+  }
+  .task-item {
+    margin: 6px 0;
+    padding: 6px;
+    background: #222;
+    border-radius: 5px;
+  }
+  .task-item.completed {
+    background: #004400;
+    color: #aaffaa;
+    text-decoration: line-through;
+  }
+  .task-reward {
+    color: #0f0;
+    font-weight: bold;
+  }
+  input[type=number] {
+    width: 50px;
+    padding: 2px 4px;
+    margin-left: 6px;
+  }
+  .sell-button {
+    background: #ff5555;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    user-select:none;
+  }
+  .sell-button:disabled {
+    background: gray;
+    cursor: not-allowed;
+  }
+  /* Scrollbar */
+  #screenContent::-webkit-scrollbar {
+    width: 6px;
+  }
+  #screenContent::-webkit-scrollbar-track {
+    background: #222;
+  }
+  #screenContent::-webkit-scrollbar-thumb {
+    background: #00ffaa;
+    border-radius: 3px;
+  }
+</style>
 </head>
 <body>
-
-<header>BBG İş Takip</header>
-
-<div id="dashboard" class="container">
-  <div class="card" onclick="showScreen('alisForm')">
-    <span>🛒</span> Alış Ekle
+<div id="gameWrapper">
+  <div id="topBar">
+    <div><span class="icon">💰</span> <span id="tlValue">0.00 TL</span></div>
+    <div><span class="icon">⛏</span> <span id="pickaxeType">Taş Kazma</span></div>
+    <div><span class="icon">🔋</span> <span id="energy">100</span></div>
+    <div><span class="icon">❤</span> <span id="durability">100</span></div>
+    <div><span class="icon">🎮</span> <span id="level">1</span></div>
   </div>
-  <div class="card" onclick="showScreen('satisForm')">
-    <span>💸</span> Satış Ekle
+  <div id="expBarContainer"><div id="expBar"></div></div>
+  <div id="taskBar">Görevler yüklendi...</div>
+  <div id="screenContent" tabindex="0">Maden ekranında kazmak için herhangi bir yere tıklayın...</div>
+  <div id="bottomBar">
+    <div class="bottomBtn" id="btnMine"><span>⛏</span>Maden</div>
+    <div class="bottomBtn" id="btnShop"><span>🏬</span>Mağaza</div>
+    <div class="bottomBtn" id="btnCraft"><span>🛠</span>Craft</div>
+    <div class="bottomBtn" id="btnInventory"><span>🎒</span>Envanter</div>
+    <div class="bottomBtn" id="btnTasks"><span>🎯</span>Görevler</div>
+    <div class="bottomBtn" id="btnBank"><span>🏦</span>Banka</div>
   </div>
-  <div class="card" onclick="showStok()">
-    <span>📦</span> Stok Görüntüle
-  </div>
-  <div class="card" onclick="showScreen('gelirForm')">
-    <span>💰</span> Gelir
-  </div>
 </div>
 
-<!-- Kamera Ekranı -->
-<div id="cameraContainer" class="camera-container hidden">
-  <video id="camera" autoplay></video>
-  <button onclick="stopScanner()">Kapat</button>
-</div>
-
-<!-- Alış Ekranı -->
-<div id="alisForm" class="form hidden">
-  <h2>🛒 Alış Ekle</h2>
-  <input type="text" id="alisUrun" placeholder="Ürün Adı">
-  <input type="number" id="alisMiktar" placeholder="Miktar">
-  <input type="number" id="alisFiyat" placeholder="Alış Fiyatı (₺)">
-  <input type="text" id="imei" placeholder="IMEI (Opsiyonel)">
-  <button onclick="alisEkle()">Kaydet</button>
-  <button class="back-btn" onclick="goBack()">Geri</button>
-  <button onclick="startScanner()">Barkodla IMEI Oku</button> <!-- Barkodla IMEI Oku Butonu -->
-</div>
-
-<!-- Satış Ekranı -->
-<div id="satisForm" class="form hidden">
-  <h2>💸 Satış Ekle</h2>
-  <select id="satisUrunSelect" onchange="showImeiInfo()">
-    <!-- Ürünler buraya yüklenecek -->
-  </select>
-  <input type="number" id="satisMiktar" placeholder="Miktar">
-  <input type="number" id="satisFiyat" placeholder="Satış Tutarı (₺)">
-  <div id="imeiInfo" class="imei-info"></div>
-  <button onclick="satisEkle()">Kaydet</button>
-  <button class="back-btn" onclick="goBack()">Geri</button>
-</div>
-
-<!-- Stok Ekranı -->
-<div id="stokEkrani" class="stok-screen hidden">
-  <h2>📦 Stok Durumu</h2>
-  <div id="stokList"></div>
-  <button class="back-btn" onclick="goBack()">Geri</button>
-</div>
-
-<!-- Gelir Ekranı -->
-<div id="gelirForm" class="form hidden">
-  <h2>💰 Gelir</h2>
-  <div id="gelirList"></div>
-  <button class="back-btn" onclick="goBack()">Geri</button>
-</div>
+<!-- Ses -->
+<audio id="mineSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_8a0bdfdbe7.mp3?filename=stone-pickaxe-104196.mp3" preload="auto"></audio>
 
 <script>
-  const alislar = [];
-  const satislar = [];
-  let scannerActive = false;
+(() => {
+  // --- VERİ YAPILARI ---
 
-  function showScreen(id) {
-    document.getElementById('dashboard').classList.add('hidden');
-    document.querySelectorAll('.form, .stok-screen').forEach(e => e.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
+  // Tüm itemler (ikonlar fontawesome veya emojilerle temsil)
+  const allItems = {
+    "Taş": { value: 15, desc: "Değerli taş", icon: "🪨" },
+    "Demir": { value: 40, desc: "Demir cevheri", icon: "⛓" },
+    "Altın": { value: 80, desc: "Değerli altın", icon: "🟡" },
+    "Elmas": { value: 120, desc: "Nadir elmas", icon: "💎" },
+    "Taş Kazma": { value: 0, type: "tool", durability: 80, desc: "Başlangıç taş kazması", icon: "⛏" },
+    "Demir Kazma": { value: 5000, type: "tool", durability: 120, desc: "Daha güçlü demir kazma", icon: "⛏" },
+    "Altın Kazma": { value: 15000, type: "tool", durability: 200, desc: "Altın kazma", icon: "⛏" },
+    "Elmas Kazma": { value: 50000, type: "tool", durability: 350, desc: "Elmas kazma", icon: "⛏" },
+    "Energy Drink": { value: 1000, type: "consumable", energy: 50, desc: "Enerji içeceği +50 enerji verir.", icon: "⚡" }
+  };
+
+  // Kazma craft tarifleri
+  const craftRecipes = {
+    "Taş Kazma": { "Taş": 15 },
+    "Demir Kazma": { "Demir": 25 },
+    "Altın Kazma": { "Altın": 60 },
+    "Elmas Kazma": { "Elmas": 100 }
+  };
+
+  // Oyun durumu
+  let state = {
+    coin: 0,
+    energy: 100,
+    durability: 100,
+    level: 1,
+    exp: 0,
+    bag: [],
+    equippedPickaxe: "Taş Kazma",
+  };
+
+  // Görevler: 5 normal + 1 günlük
+  let tasks = [
+    { id: 1, text: "5 taş kaz", item: "Taş", count: 5, done: 0, coinReward: 25, expReward: 10, completed: false },
+    { id: 2, text: "3 demir kaz", item: "Demir", count: 3, done: 0, coinReward: 40, expReward: 15, completed: false },
+    { id: 3, text: "2 altın bul", item: "Altın", count: 2, done: 0, coinReward: 60, expReward: 20, completed: false },
+    { id: 4, text: "1 elmas çıkar", item: "Elmas", count: 1, done: 0, coinReward: 100, expReward: 40, completed: false },
+    { id: 5, text: "10 taş sat", item: "Taş", count: 10, done: 0, coinReward: 30, expReward: 15, completed: false },
+  ];
+  let dailyTask = { id: 6, text: "Günlük görev: 15 taş kaz!", item: "Taş", count: 15, done: 0, coinReward: 100, expReward: 60, completed: false };
+
+  // --- KAYDET & YÜKLE ---
+
+  function saveGame() {
+    const saveData = {
+      state,
+      tasks,
+      dailyTask
+    };
+    localStorage.setItem("bbg-metin-rpg-save", JSON.stringify(saveData));
   }
 
-  function goBack() {
-    document.querySelectorAll('.form, .stok-screen').forEach(e => e.classList.add('hidden'));
-    document.getElementById('dashboard').classList.remove('hidden');
-  }
-
-  function alisEkle() {
-    const urun = document.getElementById('alisUrun').value;
-    const miktar = parseInt(document.getElementById('alisMiktar').value);
-    const fiyat = parseFloat(document.getElementById('alisFiyat').value);
-    const imei = document.getElementById('imei').value;
-    if (urun && miktar && fiyat) {
-      alislar.push({ urun, miktar, fiyat, imei });
-      alert('Alış kaydedildi');
-      goBack();
-      showStok();
-      updateSatisUrunSelect();
+  function loadGame() {
+    const saveData = JSON.parse(localStorage.getItem("bbg-metin-rpg-save"));
+    if (saveData) {
+      state = saveData.state;
+      tasks = saveData.tasks;
+      dailyTask = saveData.dailyTask;
     }
   }
 
-  function satisEkle() {
-    const urun = document.getElementById('satisUrunSelect').value;
-    const miktar = parseInt(document.getElementById('satisMiktar').value);
-    const fiyat = parseFloat(document.getElementById('satisFiyat').value);
-    const imei = alislar.find(item => item.urun === urun)?.imei;
-    if (urun && miktar && fiyat && imei) {
-      satislar.push({ urun, miktar, fiyat, imei });
-      alert('Satış kaydedildi');
-      goBack();
-      showGelir();
+  // --- YARDIMCI FONKSİYONLAR ---
+
+  function updateUI() {
+    document.getElementById("energy").textContent = state.energy;
+    document.getElementById("durability").textContent = state.durability;
+    document.getElementById("level").textContent = state.level;
+    document.getElementById("pickaxeType").textContent = state.equippedPickaxe;
+    document.getElementById("tlValue").textContent = (state.coin / 1000).toFixed(2) + " TL";
+
+    // Exp bar width hesapla
+    let neededExp = Math.floor(state.level * 120 * Math.pow(1.1, state.level-1));
+    let expPercent = Math.min(100, (state.exp / neededExp) * 100);
+    document.getElementById("expBar").style.width = expPercent + "%";
+
+    updateTaskBar();
+  }
+
+  function showNotice(text) {
+    const el = document.createElement("div");
+    el.textContent = text;
+    el.style.position = "fixed";
+    el.style.top = "30%";
+    el.style.left = "50%";
+    el.style.transform = "translateX(-50%)";
+    el.style.background = "#00ffaa";
+    el.style.color = "#000";
+    el.style.padding = "10px 20px";
+    el.style.borderRadius = "8px";
+    el.style.zIndex = 10000;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2000);
+  }
+
+  // Seviye atlama kontrolü
+  function checkLevelUp() {
+    let neededExp = Math.floor(state.level * 120 * Math.pow(1.1, state.level-1));
+    while (state.exp >= neededExp) {
+      state.exp -= neededExp;
+      state.level++;
+      state.energy = 100;
+      state.durability = allItems[state.equippedPickaxe].durability || 100;
+      showNotice(🎉 Seviye atladın! Yeni seviye: ${state.level});
+      neededExp = Math.floor(state.level * 120 * Math.pow(1.1, state.level-1));
     }
   }
 
-  function showImeiInfo() {
-    const urun = document.getElementById('satisUrunSelect').value;
-    const imeiInfoDiv = document.getElementById('imeiInfo');
-    const urunData = alislar.find(item => item.urun === urun);
-    if (urunData) {
-      imeiInfoDiv.innerHTML = IMEI: ${urunData.imei.slice(-4)};
+  // Görev barını güncelle
+  function updateTaskBar() {
+    let incompleteTasks = tasks.filter(t => !t.completed);
+    let currentTask = incompleteTasks.length > 0 ? incompleteTasks[0] : dailyTask.completed ? null : dailyTask;
+    if (!currentTask) {
+      document.getElementById("taskBar").textContent = "Tüm görevler tamamlandı! Yeni görevler yakında.";
+      return;
+    }
+    let progress = currentTask.done + "/" + currentTask.count;
+    let rewardCoin = currentTask.coinReward;
+    document.getElementById("taskBar").textContent = 🎯 Görev: ${currentTask.text} (${progress}) - Ödül: ${rewardCoin} Coin;
+  }
+
+  // Görev ilerlemesini kontrol et
+  function updateTaskProgress(item) {
+    // Normal görevler
+    for(let t of tasks){
+      if(!t.completed && t.item === item){
+        t.done++;
+        if(t.done >= t.count){
+          t.completed = true;
+          state.coin += t.coinReward;
+          state.exp += t.expReward;
+          showNotice(✅ Görev tamamlandı: ${t.text});
+        }
+      }
+    }
+    // Günlük görev
+    if(!dailyTask.completed && dailyTask.item === item){
+      dailyTask.done++;
+      if(dailyTask.done >= dailyTask.count){
+        dailyTask.completed = true;
+        state.coin += dailyTask.coinReward;
+        state.exp += dailyTask.expReward;
+        showNotice(✅ Günlük görev tamamlandı: ${dailyTask.text});
+      }
+    }
+  }
+
+  // --- OYUN MEKANİKLERİ ---
+
+  // Rastgele integer
+  function randomInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+  // Kazma işlemi (sadece Maden ekranında geçerli)
+  let clickCount = 0;
+  let rewardClickCount = randomInt(8,12);
+
+  function mineClick(e){
+    if(currentScreen !== "mine") return;
+
+    if(state.energy <= 0) {
+      showNotice("⚡ Enerjin bitti! Bankadan enerji içeceği alabilirsin.");
+      return;
+    }
+    if(state.durability <= 0) {
+      showNotice("🛠 Kazman kırıldı! Mağazadan yenisini al.");
+      return;
+    }
+
+    // Coin kazanımı (kazma tipi bazlı)
+    let baseCoinGain = 10 * state.level;
+    // Kazma gücü artışı (kazma seviyesine göre)
+    const pickaxePower = {
+      "Taş Kazma": 1,
+      "Demir Kazma": 1.6,
+      "Altın Kazma": 2.8,
+      "Elmas Kazma": 4.5
+    };
+    let coinGain = Math.floor(baseCoinGain * (pickaxePower[state.equippedPickaxe] || 1));
+    state.coin += coinGain;
+
+    // Item düşme şansı
+    clickCount++;
+    if(clickCount >= rewardClickCount) {
+      clickCount = 0;
+      rewardClickCount = randomInt(8,12);
+
+      // Item düşür
+      let itemPool = ["Taş","Demir","Altın","Elmas"];
+      // Level arttıkça nadir elmas düşme şansı biraz artsın:
+      let chances = {
+        "Taş": 0.45,
+        "Demir": 0.30,
+        "Altın": 0.18,
+        "Elmas": 0.07 + 0.01*state.level
+      };
+
+      let rand = Math.random();
+      let acc=0;
+      let dropped=null;
+      for(let it of itemPool){
+        acc += chances[it];
+        if(rand <= acc){
+          dropped = it;
+          break;
+        }
+      }
+      if(dropped){
+        addItem(dropped,1);
+        updateTaskProgress(dropped);
+        animateDrop(dropped);
+        showNotice(+1 ${dropped} kazandın!);
+      }
+    }
+
+    // Kazma dayanıklılığı ve enerji azalması (level zorluk arttıkça daha hızlı azalabilir)
+    let durabilityLoss = 1 + state.level*0.05;
+    let energyLoss = 1 + state.level*0.03;
+    state.durability = Math.max(0, state.durability - durabilityLoss);
+    state.energy = Math.max(0, state.energy - energyLoss);
+
+    // Exp kazanımı
+    let expGain = 5 + Math.floor(state.level/2);
+    state.exp += expGain;
+    checkLevelUp();
+    updateUI();
+    saveGame();
+
+    // Kazma sesi çal
+    document.getElementById("mineSound").currentTime = 0;
+    document.getElementById("mineSound").play();
+  }
+
+  // Animasyonlu item drop gösterimi
+  function animateDrop(itemName) {
+    let icon = allItems[itemName].icon || "❓";
+    let el = document.createElement("div");
+    el.textContent = icon;
+    el.classList.add("mine-icon");
+    el.style.left = (window.innerWidth/2 + (Math.random()*100-50)) + "px";
+    el.style.top = (window.innerHeight/2 + (Math.random()*40-20)) + "px";
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 800);
+  }
+
+  // Envantere item ekle
+  function addItem(name, qty) {
+    let slot = state.bag.find(i => i.name === name);
+    if(slot) {
+      slot.qty += qty;
     } else {
-      imeiInfoDiv.innerHTML = '';
+      state.bag.push({name, qty});
     }
   }
 
-  function showStok() {
-    const stok = {};
-    const alisFiyat = {};
-    const satisFiyat = {};
+  // --- EKRANLAR ---
 
-    alislar.forEach(e => {
-      stok[e.urun] = (stok[e.urun] || 0) + e.miktar;
-      alisFiyat[e.urun] = e.fiyat; // son alış fiyatı
-    });
+  let currentScreen = "mine";
+  const screenContent = document.getElementById("screenContent");
 
-    satislar.forEach(e => {
-      stok[e.urun] = (stok[e.urun] || 0) - e.miktar;
-      satisFiyat[e.urun] = e.fiyat; // son satış fiyatı
-    });
+  function showMineScreen() {
+    currentScreen = "mine";
+    screenContent.innerHTML = "Maden ekranında kazmak için herhangi bir yere tıklayın.<br><br>" +
+      "<b>Enerji ve Kazma Dayanıklılığını iyi takip et!</b>";
+  }
 
-    const list = document.getElementById('stokList');
-    list.innerHTML = '';
-
-    for (let urun in stok) {
-      const miktar = stok[urun];
-      const alis = alisFiyat[urun] ? ₺${alisFiyat[urun]} : '—';
-      const satis = satisFiyat[urun] ? ₺${satisFiyat[urun]} : '—';
-
-      const item = document.createElement('div');
-      item.className = 'stok-item';
-      item.innerHTML = `
-        <strong>${urun}</strong>
-        <span>Stok: ${miktar}</span>
-        <span>Son Alış Fiyatı: ${alis}</span>
-        <span>Son Satış Fiyatı: ${satis}</span>
-      `;
-      list.appendChild(item);
+  function showShopScreen() {
+    currentScreen = "shop";
+    let html = <h2>Mağaza</h2><p>Kazma çeşitleri satın alınabilir.</p>;
+    for(let key of Object.keys(craftRecipes)){
+      let price = allItems[key].value;
+      let isAffordable = state.coin >= price;
+      html += `<div class="item-row">
+        <div>${allItems[key].icon} ${key}</div>
+        <div><b>${price} Coin</b></div>
+        <div><button ${isAffordable ? "" : "disabled"} onclick="buyPickaxe('${key}')">Satın Al</button></div>
+      </div>`;
     }
-
-    showScreen('stokEkrani');
+    screenContent.innerHTML = html;
   }
 
-  function updateSatisUrunSelect() {
-    const select = document.getElementById('satisUrunSelect');
-    select.innerHTML = '';
-    alislar.forEach(item => {
-      const option = document.createElement('option');
-      option.value = item.urun;
-      option.textContent = item.urun;
-      select.appendChild(option);
-    });
-  }
-
-  function showGelir() {
-    const gelirList = document.getElementById('gelirList');
-    gelirList.innerHTML = ''; // Gelir listesi temizleniyor
-
-    satislar.forEach(e => {
-      gelirList.innerHTML += <div class="stok-item"><span>${e.urun}</span><span>Miktar: ${e.miktar}</span><span>Tutar: ₺${e.fiyat * e.miktar}</span></div>;
-    });
-  }
-
-  function startScanner() {
-    document.getElementById('cameraContainer').classList.remove('hidden');
-    document.getElementById('dashboard').classList.add('hidden');
-    
-    if (!scannerActive) {
-      navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" } // "environment" arka kamerayı ifade eder
-      })
-      .then(stream => {
-        const videoElement = document.getElementById('camera');
-        videoElement.srcObject = stream;
-        videoElement.play();
-        scannerActive = true;
-
-        const barcodeDetector = new BarcodeDetector({ formats: ['qr_code', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128'] });
-        const scanBarcode = () => {
-          barcodeDetector.detect(videoElement).then(barcodes => {
-            if (barcodes.length > 0) {
-              const barcode = barcodes[0].rawValue;
-              document.getElementById('imei').value = barcode; // Barkod değeri IMEI alanına yansır
-            }
-          }).catch(console.error);
-        };
-
-        // Barkodları sürekli olarak tarar
-        setInterval(scanBarcode, 1000);
-      })
-      .catch(err => {
-        alert("Kamera açılmadı: " + err);
-      });
+  function buyPickaxe(pickaxeName){
+    let price = allItems[pickaxeName].value;
+    if(state.coin >= price){
+      state.coin -= price;
+      // Kazmayı değiştir, dayanıklılığı tam dolu yap
+      state.equippedPickaxe = pickaxeName;
+      state.durability = allItems[pickaxeName].durability;
+      showNotice(${pickaxeName} satın alındı ve kuşandın!);
+      saveGame();
+      updateUI();
+      showShopScreen();
     }
   }
 
-  function stopScanner() {
-    document.getElementById('cameraContainer').classList.add('hidden');
-    document.getElementById('dashboard').classList.remove('hidden');
+  function showCraftScreen() {
+    currentScreen = "craft";
+    let html = <h2>Craft Ekranı</h2><p>Malzemelerin:</p><div>;
+    for(let item in craftRecipes){
+      html += `<div class="craft-item">${allItems[item].icon} <b>${item}</b> — Gereken: `;
+      let needed = craftRecipes[item];
+      let parts = [];
+      for(let mat in needed){
+        let owned = (state.bag.find(b => b.name === mat)?.qty) || 0;
+        let enough = owned >= needed[mat];
+        parts.push(<span style="color:${enough ? "#0f0" : "#f00"}">${mat} (${owned}/${needed[mat]})</span>);
+      }
+      html += parts.join(", ") + ` <button onclick="craftItem('${item}')" ${canCraft(item) ? "" : "disabled"}>Craft</button></div>`;
+    }
+    html += </div>;
+    screenContent.innerHTML = html;
   }
+
+  function canCraft(item){
+    if(!craftRecipes[item]) return false;
+    let needed = craftRecipes[item];
+    for(let mat in needed){
+      let owned = (state.bag.find(b => b.name === mat)?.qty) || 0;
+      if(owned < needed[mat]) return false;
+    }
+    return true;
+  }
+
+  function craftItem(item) {
+    if(!canCraft(item)) return;
+    let needed = craftRecipes[item];
+    for(let mat in needed){
+      let slot = state.bag.find(b => b.name === mat);
+      slot.qty -= needed[mat];
+      if(slot.qty <= 0) {
+        state.bag = state.bag.filter(b => b.qty > 0);
+      }
+    }
+    addItem(item, 1);
+    showNotice(${item} üretildi!);
+    saveGame();
+    updateUI();
+    showCraftScreen();
+  }
+
+  function showInventoryScreen() {
+    currentScreen = "inventory";
+    if(state.bag.length === 0) {
+      screenContent.innerHTML = "<p>Envanter boş.</p>";
+      return;
+    }
+    let html = "<h2>Envanter</h2>";
+    for(let slot of state.bag){
+      html += `<div class="item-row">
+        <div>${allItems[slot.name]?.icon || "❓"} ${slot.name}</div>
+        <div>Adet: ${slot.qty}</div>
+        <div><button class="sell-button" onclick="sellItem('${slot.name}', 1)">Sat</button></div>
+      </div>`;
+    }
+    screenContent.innerHTML = html;
+  }
+
+  function sellItem(itemName, qty){
+    let slot = state.bag.find(b => b.name === itemName);
+    if(!slot || slot.qty < qty) return;
+    let price = (allItems[itemName]?.value || 1) * qty;
+    slot.qty -= qty;
+    if(slot.qty <= 0) state.bag = state.bag.filter(b => b.qty > 0);
+    state.coin += price;
+    showNotice(${qty} ${itemName} satıldı, +${price} Coin kazandın.);
+    updateTaskProgress(itemName); // Satmak da görev olabilir
+    saveGame();
+    updateUI();
+    showInventoryScreen();
+  }
+
+  function showTasksScreen() {
+    currentScreen = "tasks";
+    let html = "<h2>Görevler</h2>";
+    for(let t of tasks){
+      html += `<div class="task-item ${t.completed ? "completed" : ""}">
+        <div>${t.text}</div>
+        <div>Durum: ${t.done}/${t.count}</div>
+        <div class="task-reward">Ödül: ${t.coinReward} Coin, ${t.expReward} Exp</div>
+      </div>`;
+    }
+    html += <h3>Günlük Görev</h3>;
+    html += `<div class="task-item ${dailyTask.completed ? "completed" : ""}">
+      <div>${dailyTask.text}</div>
+      <div>Durum: ${dailyTask.done}/${dailyTask.count}</div>
+      <div class="task-reward">Ödül: ${dailyTask.coinReward} Coin, ${dailyTask.expReward} Exp</div>
+    </div>`;
+    screenContent.innerHTML = html;
+  }
+
+  // Banka ekranı: Para çek, yatır, enerji içeceği al
+  function showBankScreen(){
+    currentScreen = "bank";
+    screenContent.innerHTML = `
+      <h2>Banka</h2>
+      <div><b>Coin:</b> ${state.coin} | <b>TL Karşılığı:</b> ${(state.coin/1000).toFixed(2)} TL</div>
+      <br>
+      <h3>Para Çekme</h3>
+      <label>IBAN:</label><br>
+      <input type="text" id="ibanInput" placeholder="TRxx xxxx xxxx xxxx xxxx xxxx xx" style="width: 100%;"><br>
+      <label>IBAN Sahibi:</label><br>
+      <input type="text" id="ibanOwnerInput" placeholder="Ad Soyad" style="width: 100%;"><br>
+      <label>Tutar (Coin):</label><br>
+      <input type="number" id="withdrawAmount" min="1" max="${state.coin}" value="1" style="width: 100%;"><br>
+      <button onclick="withdrawCoin()">Para Çek</button>
+
+      <br><br>
+      <h3>Para Yatırma</h3>
+      <label>IBAN:</label><br>
+      <input type="text" id="depositIban" value="TR90 0011 1000 0000 0118 8170 01" readonly style="width: 100%;"><br>
+      <label>İsim Soyisim:</label><br>
+      <input type="text" id="depositName" value="Burak Güleşci" readonly style="width: 100%;"><br>
+      <label>Yatırım Tutarı (TL):</label><br>
+      <input type="number" id="depositAmount" min="1" value="100" style="width: 100%;"><br>
+      <button onclick="depositCoin()">Onayla</button>
+
+      <br><br>
+      <h3>Enerji İçeceği</h3>
+      <div>50 enerji verir, fiyat: 1000 Coin</div>
+      <button onclick="buyEnergyDrink()">Satın Al</button>
+    `;
+  }
+
+  // Para çekme işlemi
+  window.withdrawCoin = function(){
+    let iban = document.getElementById("ibanInput").value.trim();
+    let owner = document.getElementById("ibanOwnerInput").value.trim();
+    let amount = parseInt(document.getElementById("withdrawAmount").value);
+    if(!iban || !owner){
+      alert("Lütfen IBAN ve sahip bilgilerini girin!");
+      return;
+    }
+    if(isNaN(amount) || amount < 1 || amount > state.coin){
+      alert("Geçersiz tutar!");
+      return;
+    }
+    state.coin -= amount;
+    showNotice(${amount} Coin çekildi. İşleminiz en kısa sürede işlenecektir.);
+    saveGame();
+    updateUI();
+    showBankScreen();
+  }
+
+  // Para yatırma işlemi
+  window.depositCoin = function(){
+    let amount = parseInt(document.getElementById("depositAmount").value);
+    if(isNaN(amount) || amount < 1){
+      alert("Geçersiz yatırım tutarı!");
+      return;
+    }
+    // Burada gerçek para yatırma işlemi yok, sadece bilgilendirme
+    showNotice(Ödemeniz alındı. En kısa sürede hesabınıza yansıtılacaktır.);
+  }
+
+  // Enerji içeceği satın alma
+  window.buyEnergyDrink = function(){
+    let price = allItems["Energy Drink"].value;
+    if(state.coin < price){
+      alert("Yeterli Coin yok!");
+      return;
+    }
+    state.coin -= price;
+    state.energy = Math.min(100, state.energy + allItems["Energy Drink"].energy);
+    showNotice("Enerji içeceği satın alındı! Enerjin yenilendi.");
+    saveGame();
+    updateUI();
+    showBankScreen();
+  }
+
+  // --- BUTON EVENTLERİ ---
+
+  document.getElementById("btnMine").addEventListener("click", showMineScreen);
+  document.getElementById("btnShop").addEventListener("click", showShopScreen);
+  document.getElementById("btnCraft").addEventListener("click", showCraftScreen);
+  document.getElementById("btnInventory").addEventListener("click", showInventoryScreen);
+  document.getElementById("btnTasks").addEventListener("click", showTasksScreen);
+  document.getElementById("btnBank").addEventListener("click", showBankScreen);
+
+  // --- SAYFA KİLİDİ KAZMA İŞLEMİ ---
+
+  screenContent.addEventListener("click", (e) => {
+    if(currentScreen === "mine") {
+      mineClick(e);
+    }
+  });
+
+  // --- BAŞLANGIÇ ---
+
+  loadGame();
+  updateUI();
+  showMineScreen();
+
+  // Global fonksiyonlar
+  window.buyPickaxe = buyPickaxe;
+  window.craftItem = craftItem;
+  window.sellItem = sellItem;
+
+})();
 </script>
-
 </body>
 </html>
