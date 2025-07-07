@@ -231,8 +231,15 @@
     "Altın Kazma": { value: 15000, type: "tool", durability: 200, desc: "Altın kazma", icon: "⛏" },
     "Elmas Kazma": { value: 50000, type: "tool", durability: 350, desc: "Elmas kazma", icon: "⛏" },
     "Energy Drink": { value: 1000, type: "consumable", energy: 50, desc: "Enerji içeceği +50 enerji verir.", icon: "⚡" }
+
   };
 
+    <br><br>
+      <h3>Enerji İçeceği</h3>
+      <div>50 enerji verir, fiyat: 1000 Coin</div>
+      <button onclick="buyEnergyDrink()">Satın Al</button>
+    `;
+  }
   // Kazma craft tarifleri
   const craftRecipes = {
     "Taş Kazma": { "Taş": 15 },
@@ -380,7 +387,7 @@
     if(currentScreen !== "mine") return;
 
     if(state.energy <= 0) {
-      showNotice("⚡ Enerjin bitti! Bankadan enerji içeceği alabilirsin.");
+      showNotice("⚡ Enerjin bitti! Mağazadan enerji içeceği alabilirsin.");
       return;
     }
     if(state.durability <= 0) {
@@ -635,12 +642,7 @@
       <input type="number" id="depositAmount" min="1" value="100" style="width: 100%;"><br>
       <button onclick="depositCoin()">Onayla</button>
 
-      <br><br>
-      <h3>Enerji İçeceği</h3>
-      <div>50 enerji verir, fiyat: 1000 Coin</div>
-      <button onclick="buyEnergyDrink()">Satın Al</button>
-    `;
-  }
+ 
 
   // Para çekme işlemi
   window.withdrawCoin = function(){
