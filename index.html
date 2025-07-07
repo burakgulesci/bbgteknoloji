@@ -674,21 +674,32 @@
   }
 
   // Enerji içeceği satın alma
- window.buyEnergyDrink = function() {
-  const price = allItems["Energy Drink"].value;
-  if (state.coin < price) {
-    alert("Yeterli Coin yok!");
-    return;
-  }
-  
-  state.coin -= price;
-  state.energy = Math.min(100, state.energy + allItems["Energy Drink"].energy); // Enerji artışı
+ sc.querySelectorAll(".buy-button").forEach(btn => {
+  btn.onclick = () => {
+    let name = btn.getAttribute("data-name");
+    let item = allItems[name];
+    if(state.coin >= item.value){
+      state.coin -= item.value;
+      if(item.type === "tool"){
+        state.equippedPickaxe = name;
+        state.durability = item.durability || 100;
+        showNotice(`${name} satın alındı ve kuşanıldı!`);
+      } else if (name === "Energy Drink") {
+        state.energy = Math.min(100, state.energy + item.energy);
+        showNotice("Enerji içeceği satın alındı! Enerjin yenilendi.");
+      } else {
+        addItem(name,1);
+        showNotice(`${name} satın alındı!`);
+      }
+      updateUI();
+      saveGame();
+      showShopScreen();
+    } else {
+      showNotice("Yeterli paran yok.");
+    }
+  };
+});
 
-  showNotice("Enerji içeceği satın alındı! Enerjin yenilendi.");
-  saveGame();
-  updateUI();
-  showBankScreen();
-};
 
 
   // --- BUTON EVENTLERİ ---
